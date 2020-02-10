@@ -16,6 +16,17 @@ public class LR {
     @Context
     public GraphDatabaseService db;
 
+    @UserFunction
+    @Description("neoplus.mult(value, value)")
+    public Double mult(
+            @Name("number1") Double number1,
+            @Name("number2") Double number2
+    ) {
+        if (number1 == null || number2 == null) {
+            return null;
+        }
+        return number1 * number2;
+    }
 
     /**First test procedure: multiply a node property by a given factor
      * and streams the results

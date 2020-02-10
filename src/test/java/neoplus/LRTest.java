@@ -22,19 +22,32 @@ public class LRTest {
         this.embeddedDatabaseServer = TestServerBuilders
                 .newInProcessBuilder()
                 .withProcedure(LR.class)
+                .withFunction(LR.class)
                 .newServer();
     }
 
     @Test
-    public void shouldMultiplyBy() {
-
-        assertThat(false);
+    public void testMult() {
 
         // In a try-block, to make sure we close the driver and session after the test
         try(Driver driver = GraphDatabase.driver(embeddedDatabaseServer.boltURI(), driverConfig);
             Session session = driver.session())
         {
-            // Given I've started Neo4j with the neoplus procedure class
+            // Then I can call the multiplyBy procedure
+            StatementResult result = session.run("RETURN neoplus.mult(2, 10.0)");
+            Record r = result.single();
+            assertThat(r.get(0).asDouble()).isEqualTo( 20.0 );
+        }
+    }
+
+    @Test
+    public void shouldMultiplyBy() {
+
+        // In a try-block, to make sure we close the driver and session after the test
+        try(Driver driver = GraphDatabase.driver(embeddedDatabaseServer.boltURI(), driverConfig);
+            Session session = driver.session())
+        {
+            // Given I've started Neo4j with the neoplus.LR procedure class
             //       which my 'neo4j' rule above does.
             // And given I have a node in the database
             long nodeId = session.run( "CREATE (p:Label {property:1.0}) RETURN id(p)" )
