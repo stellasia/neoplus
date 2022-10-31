@@ -16,7 +16,7 @@ public class ShortestPath {
      * @param weightProperty the relationship property to be used as weight
      * @return the length of the shortest path
      */
-    @UserFunction(name = "neoplus.shortestPath")
+    @UserFunction(name = "neoplus.pathShortest")
     @Description("Length of the (weighted) shortest path between two nodes")
     public Double shortestPath(
             @Name("startNode") Node startNode,
@@ -39,9 +39,9 @@ public class ShortestPath {
                 return r;
             }
             // find all OUTGOING or INCOMING relationships associated with stepStartNode
-            Iterable rels = stepStartNode.getRelationships(Direction.BOTH);
-            for (Object obj : rels) {
-                Relationship rel = (Relationship) obj;
+            Iterable<Relationship> rels = stepStartNode.getRelationships(Direction.BOTH);
+            for (Relationship obj : rels) {
+                Relationship rel = obj;
                 // find the node at the other end of the relationship
                 Node neighbor = rel.getOtherNode(stepStartNode);
                 Double weight = (double) rel.getProperty(weightProperty, 1.0);
@@ -77,8 +77,7 @@ public class ShortestPath {
                     entry -> !visitedNodes.contains(entry.getKey())
             ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             // then select the node with the shortest distance to the start node
-            Node nextNode = Collections.min(fmap.entrySet(), Map.Entry.comparingByValue()).getKey();
-            stepStartNode = nextNode;
+            stepStartNode = Collections.min(fmap.entrySet(), Map.Entry.comparingByValue()).getKey();
         }
     }
 }
