@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PriceTest {
 
     private static final Config driverConfig = Config.builder().withoutEncryption().build();
-    // private ServerControls embeddedDatabaseServer;
     private Neo4j embeddedDatabaseServer; // <2>
 
     @BeforeAll // <3>
@@ -43,7 +42,6 @@ public class PriceTest {
         try(Driver driver = GraphDatabase.driver(embeddedDatabaseServer.boltURI(), driverConfig);
             Session session = driver.session())
         {
-            // Then I can call the multiplyBy procedure
             Result result = session.run("RETURN neoplus.discountedPrice(2, 10.0)");
             Record r = result.single();
             assertThat(r.get(0).asDouble()).isEqualTo( 20.0 );
@@ -53,11 +51,9 @@ public class PriceTest {
     @Test
     public void testDiscountedPriceWithNulls() {
 
-        // In a try-block, to make sure we close the driver and session after the test
         try(Driver driver = GraphDatabase.driver(embeddedDatabaseServer.boltURI(), driverConfig);
             Session session = driver.session())
         {
-            // Then I can call the multiplyBy procedure
             Result result = session.run("RETURN neoplus.discountedPrice(2, null)");
             Record r = result.single();
             assertThat(r.get(0)).isInstanceOf(NullValue.class);
@@ -76,12 +72,9 @@ public class PriceTest {
     @Test
     public void testDiscountPriceForLabel() {
 
-        // In a try-block, to make sure we close the driver and session after the test
         try(Driver driver = GraphDatabase.driver(embeddedDatabaseServer.boltURI(), driverConfig);
             Session session = driver.session())
         {
-
-            // Then I can call the multiplyBy procedure
             Result records = session.run("CALL neoplus.discountPriceForLabel('Product', 'fullPrice', 'discount', 10.0)");
             var result = records.stream()
                     .map(r -> r.get("discountPrice"))

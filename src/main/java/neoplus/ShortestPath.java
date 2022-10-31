@@ -16,7 +16,7 @@ public class ShortestPath {
      * @param weightProperty the relationship property to be used as weight
      * @return the length of the shortest path
      */
-    @UserFunction(name = "neoplus.pathShortest")
+    @UserFunction(name = "neoplus.shortestPathLength")
     @Description("Length of the (weighted) shortest path between two nodes")
     public Double shortestPath(
             @Name("startNode") Node startNode,

@@ -2,11 +2,25 @@
 
 A test project to build user defined procedures to be run against a Neo4j database from Cypher.
 
+> Except for learning purposes, this repo does not contain any useful stuff.
+
 Project built from: https://github.com/neo4j-examples/neo4j-procedure-template/
 
 ## Content
 
-Procedure to multiply a node property by a given factor and return the node id and the product of the multiplication.
+Functions to compute a discount price from a full price and a discount factor. They come in different flavours:
+
+- `neoplus.discountPrice(price, discount)` is a simple function that takes two (double) numbers as input, and returns the discounted price
+- `neoplus.discountPriceForNode(node)` is called for a given node with properties "price" and "discount" and returns the discounted price
+- `neoplus.setDiscountPrice(node)` : update the node to set the discounted price based on "price" and "discount" properties
+- `neoplus.discountPriceForLabel(label, priceProperty, discountProperty, defaultDiscountValue)` is a slightly more complex procedure
+   streaming the discounted price for all nodes with a given label, using configured price and discount
+   property names, with the ability to have a default value for discount if the node property
+   is not set.
+
+Another type of functions are related to shortest path algorithms:
+- `neoplus.shortestPathLength(node1, node2)`: returns the length of the shortest path
+   between node1 and node2.
 
 ## Usage
 
@@ -21,7 +35,7 @@ Procedure to multiply a node property by a given factor and return the node id a
        
 0. Call the new procedure:
 
-       CALL neoplus.multiplyBy("MyLabel", "myProperty", 10.0) 
+       CALL neoplus.discountPriceForLabel("MyLabel", "price", "discount", 1.0) 
        YIELD newValue, nodeId 
        RETURN nodeId, newValue
  

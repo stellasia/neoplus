@@ -15,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ShortestPathTest {
 
     private static final Config driverConfig = Config.builder().withoutEncryption().build();
-    // private ServerControls embeddedDatabaseServer;
     private Neo4j embeddedDatabaseServer; // <2>
 
     @BeforeAll // <3>
@@ -33,18 +32,14 @@ public class ShortestPathTest {
         try(Driver driver = GraphDatabase.driver(embeddedDatabaseServer.boltURI(), driverConfig);
             Session session = driver.session())
         {
-            // Given I've started Neo4j with the neoplus procedure class
-            //       which my 'neo4j' rule above does.
-            // And given I have a node in the database
             session.run("CREATE (p1:Label {id:1}) " +
                     "CREATE (p2:Label {id:2}) " +
                     "CREATE (p1)-[:LINKED_TO {w: 12.0}]->(p2);"
             );
 
-            // Then I can call the shortestPath procedure
             Result result = session.run(
                     "MATCH (p1:Label {id:1}) MATCH (p2:Label {id:2}) " +
-                            "RETURN neoplus.pathShortest(p1, p2, 'w')"
+                            "RETURN neoplus.shortestPathLength(p1, p2, 'w')"
             );
             Record r = result.single();
             assertThat(r.get(0).asDouble()).isEqualTo(12.0);
