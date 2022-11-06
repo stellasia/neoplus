@@ -31,7 +31,7 @@ public class ShortestPath {
         Node stepStartNode = startNode;
         while (true) {
             System.out.format("----- Start iteration with node %d \n", stepStartNode.getId());
-            if (stepStartNode.getId() == endNode.getId()) {
+            if (stepStartNode.getElementId().equals(endNode.getElementId())) {
                 // we have reached the end node, stop
                 System.out.println("Getting results");
                 Double r = shortestDistances.get(endNode);
@@ -40,13 +40,12 @@ public class ShortestPath {
             }
             // find all OUTGOING or INCOMING relationships associated with stepStartNode
             Iterable<Relationship> rels = stepStartNode.getRelationships(Direction.BOTH);
-            for (Relationship obj : rels) {
-                Relationship rel = obj;
+            for (Relationship rel : rels) {
                 // find the node at the other end of the relationship
                 Node neighbor = rel.getOtherNode(stepStartNode);
                 Double weight = (double) rel.getProperty(weightProperty, 1.0);
-                System.out.format("-- Neighbor %d with weight %2.1f\n", neighbor.getId(), weight);
-                // if not already visited, skip
+                System.out.format("-- Neighbor %s with weight %2.1f\n", neighbor.getElementId(), weight);
+                // if node already visited, skip
                 if (visitedNodes.contains(neighbor)) {
                     System.out.println("\t already visited, skipping node");
                     continue;
@@ -59,8 +58,8 @@ public class ShortestPath {
                                 + (double) rel.getProperty(weightProperty, 1.0);
                 // if new distance is shorter than the previous distance, we have a new shortest path
                 if (newDistance < previousDistance) {
-                    System.out.format("\t Found new shortest path between %d and %d : %2.1f \n",
-                            startNode.getId(), neighbor.getId(), newDistance);
+                    System.out.format("\t Found new shortest path between %s and %s : %2.1f \n",
+                            startNode.getElementId(), neighbor.getElementId(), newDistance);
                     shortestDistances.put(neighbor, newDistance);
                     parentNodes.put(neighbor, stepStartNode);
                 } else {

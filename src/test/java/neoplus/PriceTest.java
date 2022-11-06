@@ -29,7 +29,8 @@ public class PriceTest {
         this.embeddedDatabaseServer = Neo4jBuilders.newInProcessBuilder()
                 .withFunction(Price.class)
                 .withProcedure(Price.class)
-                .withFixture("CREATE (:Product {id: 1, fullPrice: 1.0, discount: 2.0})")
+                .withFixture("CREATE (:OldProduct {id: 0, price: 100.0, discount: 10})")
+                .withFixture("CREATE (:Product {id: 1, fullPrice: 100.0, discount: 20})")
                 .withFixture("CREATE (:Product {id: 2, fullPrice: 1.0})")
                 .withDisabledServer()
                 .build();
@@ -42,9 +43,9 @@ public class PriceTest {
         try(Driver driver = GraphDatabase.driver(embeddedDatabaseServer.boltURI(), driverConfig);
             Session session = driver.session())
         {
-            Result result = session.run("RETURN neoplus.discountedPrice(2, 10.0)");
+            Result result = session.run("RETURN neoplus.discountedPrice(100.0, 10)");
             Record r = result.single();
-            assertThat(r.get(0).asDouble()).isEqualTo( 20.0 );
+            assertThat(r.get(0).asDouble()).isEqualTo( 90.0 );
         }
     }
 
@@ -54,7 +55,7 @@ public class PriceTest {
         try(Driver driver = GraphDatabase.driver(embeddedDatabaseServer.boltURI(), driverConfig);
             Session session = driver.session())
         {
-            Result result = session.run("RETURN neoplus.discountedPrice(2, null)");
+            Result result = session.run("RETURN neoplus.discountedPrice(100, null)");
             Record r = result.single();
             assertThat(r.get(0)).isInstanceOf(NullValue.class);
 
@@ -70,18 +71,35 @@ public class PriceTest {
     }
 
     @Test
+    public void testDiscountPriceForNode() {
+
+        try(Driver driver = GraphDatabase.driver(embeddedDatabaseServer.boltURI(), driverConfig);
+            Session session = driver.session())
+        {
+            Result records = session.run(
+                    "MATCH (p:OldProduct {id: 0})" +
+                            "WITH neoplus.discountedPriceForNode(p) AS value " +
+                            "RETURN value"
+            );
+
+            double result = records.single().get(0).asDouble();
+            assertThat(result).isEqualTo(90.0);
+        }
+    }
+
+    @Test
     public void testDiscountPriceForLabel() {
 
         try(Driver driver = GraphDatabase.driver(embeddedDatabaseServer.boltURI(), driverConfig);
             Session session = driver.session())
         {
-            Result records = session.run("CALL neoplus.discountPriceForLabel('Product', 'fullPrice', 'discount', 10.0)");
+            Result records = session.run("CALL neoplus.discountedPriceForLabel('Product', 'fullPrice', 'discount', 10)");
             var result = records.stream()
-                    .map(r -> r.get("discountPrice"))
+                    .map(r -> r.get("discountedPrice"))
                     .map(Value::asDouble)
                     .sorted()
                     .collect(Collectors.toList());
-            List<Double> lst = Arrays.asList(2.0, 10.0);
+            List<Double> lst = Arrays.asList(0.9, 80.0);
             assertThat(result).isEqualTo(lst);
         }
     }
